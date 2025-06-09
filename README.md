@@ -68,3 +68,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+# Notes from Developer
+
+Users may enter search queries through the search bar or the url by adding "?q={query}" as a parameter.
+
+Clicking on a gif will copy that gif's url to the clipboard. Green text will appear to confirm that the url was copied.
+
+The "prev" and "next" buttons will cycle between the first 100 gifs with a given search prompt. Only the current gif in the cycle will be stored in the "Previous Results" section.
