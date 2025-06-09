@@ -24,7 +24,7 @@ const Giphy = () => {
                     try {
                         setIsLoading(true);
                         setIsStored(false);
-                        const results = await axios("http://api.giphy.com/v1/gifs/search", {
+                        const results = await axios("https://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
@@ -48,7 +48,7 @@ const Giphy = () => {
                     setIsLoading(true);
                     setIsStored(false);
                     for(let i = 0; i < 3; i++){
-                        const results = await axios("http://api.giphy.com/v1/gifs/random", {
+                        const results = await axios("https://api.giphy.com/v1/gifs/random", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h"
                             }
