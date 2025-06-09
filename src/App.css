@@ -3,6 +3,10 @@ body {
   color: white;
 }
 
+.copied {
+  color: lime;
+}
+
 .m-2 {
     text-align: center;
     white-space: pre-line;

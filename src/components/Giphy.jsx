@@ -72,6 +72,7 @@ const Giphy = () => {
     }, []);
 
     const handlePrev = event =>{
+        setIsCopy(false);
         if (selectedIndex === 0){
             setSelectedIndex(searchData.length - 1);
         }
@@ -81,6 +82,7 @@ const Giphy = () => {
     }
 
     const handleNext = event =>{
+        setIsCopy(false);
         if (selectedIndex === searchData.length - 1){
             setSelectedIndex(0);
         }
@@ -176,7 +178,7 @@ const Giphy = () => {
     const renderCopy = () => {
         if (isCopy){
             return (
-                <div>
+                <div class="copied">
                     Copied Gif Url - {copyText}
                 </div>
             );
@@ -214,6 +216,7 @@ const Giphy = () => {
         setIsLoading(false);
         setIsStored(false);
         setSelectedIndex(0);
+        setIsCopy(false);
      };
 
     return (
@@ -236,7 +239,6 @@ const Giphy = () => {
             </div>
             <h2>Previous Results</h2>
             <div className="container gifs">
-                {renderCopy()}
                 {renderStoredGifs()}
             </div>
         </div>
