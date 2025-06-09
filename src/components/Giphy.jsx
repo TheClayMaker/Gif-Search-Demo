@@ -11,6 +11,7 @@ const Giphy = () => {
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -28,7 +29,7 @@ const Giphy = () => {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 3
+                                limit: 100
                             }
                         });
                         console.log(results);
@@ -70,23 +71,50 @@ const Giphy = () => {
         fetchData();
     }, []);
 
+    const handlePrev = event =>{
+        if (selectedIndex === 0){
+            setSelectedIndex(searchData.length - 1);
+        }
+        else{
+            setSelectedIndex(selectedIndex - 1);
+        }        
+    }
+
+    const handleNext = event =>{
+        if (selectedIndex === searchData.length - 1){
+            setSelectedIndex(0);
+        }
+        else{
+            setSelectedIndex(selectedIndex + 1);
+        }        
+    }
+
     const renderGifs = () => {
         if (isLoading){
             return <div className="">Loading...</div>
         }
-        return searchData.map(el => {
-            return (
-                <div key={el.id}  type="video/mp4" className="gif">
+        if (searchData.length === 0)
+        {
+            return;
+        }
+        console.log(searchData);
+        console.log("selected index: " + selectedIndex)
+        console.log("data stored: " + isStored);
+        return (
+            <div>
+                <div id={searchData[selectedIndex].id}  type="video/mp4" className="gif">
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
-                            window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopyText(el.images.downsized.url);
+                            window.navigator.clipboard.writeText(searchData[selectedIndex].images.downsized.url);
+                            setCopyText(searchData[selectedIndex].images.downsized.url);
                             setIsCopy(true);
                         }
-                    } src={el.images.looping.mp4}/>
+                    } src={searchData[selectedIndex].images.looping.mp4}/>
                 </div>
-            )
-        })
+                <button onClick={handlePrev} className="btn mx-2">Prev</button>
+                <button onClick={handleNext} className="btn mx-2">Next</button>
+            </div>
+        )
     };
 
     const renderStoredGifs = () => {
@@ -95,7 +123,7 @@ const Giphy = () => {
         }
         return storedData.map(el => {
             return (
-                <div key={el.id}  type="video/mp4" className="stored-gif">
+                <div id={el.id}  type="video/mp4" className="stored-gif">
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
@@ -149,7 +177,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url - {copyText}!
+                    Copied Gif Url - {copyText}
                 </div>
             );
         }
@@ -163,11 +191,8 @@ const Giphy = () => {
         event.preventDefault();
         setIsError("");
         setIsLoading(true);
-        setIsStored(false);
         if (!isStored){
-            for(let i = 0; i < searchData.length; i++){
-                storedData.push(searchData[i])
-            }
+            storedData.push(searchData[selectedIndex])
             setIsStored(true);
         }
         try {
@@ -175,7 +200,7 @@ const Giphy = () => {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 3
+                limit: 100
             }
         });
         console.log(results);
@@ -187,6 +212,8 @@ const Giphy = () => {
         }
 
         setIsLoading(false);
+        setIsStored(false);
+        setSelectedIndex(0);
      };
 
     return (
