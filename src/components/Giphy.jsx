@@ -168,7 +168,7 @@ const Giphy = () => {
         }
         if (error !== ""){
             return (
-                <div>
+                <div className="error">
                     Unable to load Gifs. {error} Error Found
                 </div>
             );

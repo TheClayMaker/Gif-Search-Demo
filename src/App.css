@@ -3,6 +3,10 @@ body {
   color: white;
 }
 
+.error {
+  color: red;
+}
+
 .copied {
   color: lime;
 }
