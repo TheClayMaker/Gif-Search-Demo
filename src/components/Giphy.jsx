@@ -39,6 +39,28 @@ const Giphy = () => {
                     }
                 }
             }
+            else{
+                try {
+                    const randArray = [];
+                    setIsLoading(true);
+                    for(let i = 0; i < 3; i++){
+                        const results = await axios("http://api.giphy.com/v1/gifs/random", {
+                            params: {
+                                api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h"
+                            }
+                        });
+                        console.log(results);
+                        randArray.push(results.data.data)
+                        console.log(randArray)
+                    }
+                    setData(randArray);
+                    setIsLoading(false);
+                } catch(err) {
+                    setIsError(true);
+                    console.log(err);
+                    setTimeout(() => setIsError(false), 5000)
+                }
+            }
 
         }
         fetchData();
@@ -51,7 +73,7 @@ const Giphy = () => {
         return data.map(el => {
             return (
                 <div key={el.id}  type="video/mp4" className="gif">
-                    <video loop="true" autoplay="true" onClick={
+                    <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
                             setCopyText(el.images.downsized.url);
@@ -102,6 +124,7 @@ const Giphy = () => {
         });
         console.log(results);
         setData(results.data.data);
+        console.log(data)
         } catch (err) {
             setIsError(true);
             setTimeout(() => setIsError(false), 5000);
@@ -113,14 +136,19 @@ const Giphy = () => {
     return (
         <div className="m-2">
             {renderError()}
-            {renderCopy()}
-            <h1>Gif Search Demo</h1>
+            <div>
+                <div>
+                    Powered By GIPHY
+                </div>
+                <h1>Gif Search Demo</h1>
+            </div>
             <form className="form-inline justify-content-center m-2">
                 <input onChange={handleSeachChange} type="text" placeholder="Search" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
             </form>
             <div>(You can also search by adding ?q=[query] to the url)</div>
             <div className="container gifs">
+                {renderCopy()}
                 {renderGifs()}
             </div>
         </div>

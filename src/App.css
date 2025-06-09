@@ -3,6 +3,10 @@ body {
   color: white;
 }
 
+.m-2 {
+    text-align: center;
+}
+
 .gifs {
   margin: 0 auto;
   width: 80%;
