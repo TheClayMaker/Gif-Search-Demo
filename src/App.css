@@ -3,6 +3,11 @@ body {
   color: white;
 }
 
+.m-2 {
+    text-align: center;
+    white-space: pre-line;
+}
+
 .gifs {
   margin: 0 auto;
   width: 80%;
