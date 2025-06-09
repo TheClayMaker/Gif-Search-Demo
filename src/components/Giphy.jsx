@@ -25,7 +25,7 @@ const Giphy = () => {
                     try {
                         setIsLoading(true);
                         setIsStored(false);
-                        const results = await axios("4https://api.giphy.com/v1/gifs/search", {
+                        const results = await axios("https://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
