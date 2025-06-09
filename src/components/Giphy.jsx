@@ -8,6 +8,7 @@ const Giphy = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
     const [isCopy, setIsCopy] = useState(false);
+    const [copyText, setCopyText] = useState("");
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -53,6 +54,7 @@ const Giphy = () => {
                     <video loop="true" autoplay="true" onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
+                            setCopyText(el.images.downsized.url);
                             setIsCopy(true);
                         }
                     } src={el.images.looping.mp4}/>
@@ -75,7 +77,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url!
+                    Copied Gif Url ${copyText}!
                 </div>
             );
         }
