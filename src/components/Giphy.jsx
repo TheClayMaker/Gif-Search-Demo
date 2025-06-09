@@ -105,7 +105,7 @@ const Giphy = () => {
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopyText(el.images.downsized.url);
+                            setCopiedText(el.images.downsized.url);
                             setIsCopy(true);
                         }
                     } src={el.images.looping.mp4}/>
@@ -128,7 +128,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url ${copyText}!
+                    Copied Gif Url ${copiedText}!
                 </div>
             );
         }
