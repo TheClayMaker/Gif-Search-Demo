@@ -7,14 +7,15 @@ const Giphy = () => {
     const [storedData, setStoredData] = useState([]);
     const [search, setSearch] = useState("")
     const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
+    const [isError, setIsError] = useState("");
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
     useEffect(() =>{
         const fetchData = async () => {
-            setIsError(false);
+            setIsError("");
             const queryParameters = new URLSearchParams(window.location.search);
             console.log(queryParameters);
             if (queryParameters.has("q")){
@@ -24,11 +25,11 @@ const Giphy = () => {
                     try {
                         setIsLoading(true);
                         setIsStored(false);
-                        const results = await axios("https://api.giphy.com/v1/gifs/search", {
+                        const results = await axios("4https://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 3
+                                limit: 100
                             }
                         });
                         console.log(results);
@@ -36,9 +37,9 @@ const Giphy = () => {
                         setIsLoading(false);
 
                     } catch(err) {
-                        setIsError(true);
+                        setIsError(err.response.status);
                         console.log(err);
-                        setTimeout(() => setIsError(false), 5000)
+                        setTimeout(() => setIsError(""), 5000)
                     }
                 }
             }
@@ -60,9 +61,9 @@ const Giphy = () => {
                     setSearchData(randArray);
                     setIsLoading(false);
                 } catch(err) {
-                    setIsError(true);
+                    setIsError(err.response.status);
                     console.log(err);
-                    setTimeout(() => setIsError(false), 5000)
+                    setTimeout(() => setIsError(""), 5000)
                 }
             }
 
@@ -70,19 +71,61 @@ const Giphy = () => {
         fetchData();
     }, []);
 
+    const handlePrev = event =>{
+        setIsCopy(false);
+        if (selectedIndex === 0){
+            setSelectedIndex(searchData.length - 1);
+        }
+        else{
+            setSelectedIndex(selectedIndex - 1);
+        }        
+    }
+
+    const handleNext = event =>{
+        setIsCopy(false);
+        if (selectedIndex === searchData.length - 1){
+            setSelectedIndex(0);
+        }
+        else{
+            setSelectedIndex(selectedIndex + 1);
+        }        
+    }
+
     const renderGifs = () => {
         if (isLoading){
             return <div className="">Loading...</div>
         }
-        if (!isStored){
-            for(let i = 0; i < searchData.length; i++){
-                storedData.push(searchData[i])
-            }
-            setIsStored(true);
+        if (searchData.length === 0)
+        {
+            return;
         }
-        return searchData.map(el => {
+        console.log(searchData);
+        console.log("selected index: " + selectedIndex)
+        console.log("data stored: " + isStored);
+        return (
+            <div>
+                <div id={searchData[selectedIndex].id}  type="video/mp4" className="gif">
+                    <video loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(searchData[selectedIndex].images.downsized.url);
+                            setCopyText(searchData[selectedIndex].images.downsized.url);
+                            setIsCopy(true);
+                        }
+                    } src={searchData[selectedIndex].images.looping.mp4}/>
+                </div>
+                <button onClick={handlePrev} className="btn mx-2">Prev</button>
+                <button onClick={handleNext} className="btn mx-2">Next</button>
+            </div>
+        )
+    };
+
+    const renderStoredGifs = () => {
+        if (isLoading){
+            return <div className="">Loading...</div>
+        }
+        return storedData.map(el => {
             return (
-                <div key={el.id}  type="video/mp4" className="gif">
+                <div id={el.id}  type="video/mp4" className="stored-gif">
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
@@ -95,30 +138,38 @@ const Giphy = () => {
         })
     };
 
-    const renderStoredGifs = () => {
-        if (isLoading){
-            return <div className="">Loading...</div>
-        }
-        return storedData.map(el => {
-            return (
-                <div key={el.id}  type="video/mp4" className="gif">
-                    <video loop={true} autoPlay={true} onClick={
-                        async src => {
-                            window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopiedText(el.images.downsized.url);
-                            setIsCopy(true);
-                        }
-                    } src={el.images.looping.mp4}/>
-                </div>
-            )
-        })
-    };
-
     const renderError = () => {
-        if (isError){
+        let error = "";
+        switch (isError){
+            case "400":
+                error = "Bad Request";
+                break;
+            case "401":
+                error = "Unauthorized";
+                break;
+            case "403":
+                error = "Forbidden";
+                break;
+            case "404":
+                error = "Not Found";
+                break;
+            case "414":
+                error = "URI Too Long";
+                break;
+            case "429":
+                error = "Too Many Requests";
+                break;
+            case "":
+                error = "";
+                break;
+            default:
+                error = "Unknown";
+                break;
+        }
+        if (error !== ""){
             return (
                 <div>
-                    Unable to load Gifs.
+                    Unable to load Gifs. {error} Error Found
                 </div>
             );
         }
@@ -127,8 +178,8 @@ const Giphy = () => {
     const renderCopy = () => {
         if (isCopy){
             return (
-                <div>
-                    Copied Gif Url ${copiedText}!
+                <div class="copied">
+                    Copied Gif Url - {copyText}
                 </div>
             );
         }
@@ -140,26 +191,32 @@ const Giphy = () => {
 
     const handleSubmit = async event => {
         event.preventDefault();
-        setIsError(false);
+        setIsError("");
         setIsLoading(true);
-        setIsStored(false);
+        if (!isStored){
+            storedData.push(searchData[selectedIndex])
+            setIsStored(true);
+        }
         try {
             const results = await axios("https://api.giphy.com/v1/gifs/search", {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 3
+                limit: 100
             }
         });
         console.log(results);
         setSearchData(results.data.data);
         console.log(searchData)
         } catch (err) {
-            setIsError(true);
-            setTimeout(() => setIsError(false), 5000);
+            setIsError(err.response.status);
+            setTimeout(() => setIsError(""), 5000);
         }
 
         setIsLoading(false);
+        setIsStored(false);
+        setSelectedIndex(0);
+        setIsCopy(false);
      };
 
     return (
@@ -180,8 +237,8 @@ const Giphy = () => {
                 {renderCopy()}
                 {renderGifs()}
             </div>
-            <div>Previous Results</div>
-            <div>
+            <h2>Previous Results</h2>
+            <div className="container gifs">
                 {renderStoredGifs()}
             </div>
         </div>
