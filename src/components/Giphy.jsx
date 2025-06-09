@@ -7,14 +7,14 @@ const Giphy = () => {
     const [storedData, setStoredData] = useState([]);
     const [search, setSearch] = useState("")
     const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
+    const [isError, setIsError] = useState("");
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
 
     useEffect(() =>{
         const fetchData = async () => {
-            setIsError(false);
+            setIsError("");
             const queryParameters = new URLSearchParams(window.location.search);
             console.log(queryParameters);
             if (queryParameters.has("q")){
@@ -24,7 +24,7 @@ const Giphy = () => {
                     try {
                         setIsLoading(true);
                         setIsStored(false);
-                        const results = await axios("https://api.giphy.com/v1/gifs/search", {
+                        const results = await axios("4https://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
@@ -36,9 +36,9 @@ const Giphy = () => {
                         setIsLoading(false);
 
                     } catch(err) {
-                        setIsError(true);
+                        setIsError(err.response.status);
                         console.log(err);
-                        setTimeout(() => setIsError(false), 5000)
+                        setTimeout(() => setIsError(""), 5000)
                     }
                 }
             }
@@ -60,9 +60,9 @@ const Giphy = () => {
                     setSearchData(randArray);
                     setIsLoading(false);
                 } catch(err) {
-                    setIsError(true);
+                    setIsError(err.response.status);
                     console.log(err);
-                    setTimeout(() => setIsError(false), 5000)
+                    setTimeout(() => setIsError(""), 5000)
                 }
             }
 
@@ -109,10 +109,37 @@ const Giphy = () => {
     };
 
     const renderError = () => {
-        if (isError){
+        let error = "";
+        switch (isError){
+            case "400":
+                error = "Bad Request";
+                break;
+            case "401":
+                error = "Unauthorized";
+                break;
+            case "403":
+                error = "Forbidden";
+                break;
+            case "404":
+                error = "Not Found";
+                break;
+            case "414":
+                error = "URI Too Long";
+                break;
+            case "429":
+                error = "Too Many Requests";
+                break;
+            case "":
+                error = "";
+                break;
+            default:
+                error = "Unknown";
+                break;
+        }
+        if (error !== ""){
             return (
                 <div>
-                    Unable to load Gifs.
+                    Unable to load Gifs. {error} Error Found
                 </div>
             );
         }
@@ -122,7 +149,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url ${copyText}!
+                    Copied Gif Url - {copyText}!
                 </div>
             );
         }
@@ -134,7 +161,7 @@ const Giphy = () => {
 
     const handleSubmit = async event => {
         event.preventDefault();
-        setIsError(false);
+        setIsError("");
         setIsLoading(true);
         setIsStored(false);
         if (!isStored){
@@ -155,8 +182,8 @@ const Giphy = () => {
         setSearchData(results.data.data);
         console.log(searchData)
         } catch (err) {
-            setIsError(true);
-            setTimeout(() => setIsError(false), 5000);
+            setIsError(err.response.status);
+            setTimeout(() => setIsError(""), 5000);
         }
 
         setIsLoading(false);
