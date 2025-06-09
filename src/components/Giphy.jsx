@@ -112,10 +112,12 @@ const Giphy = () => {
         <div className="m-2">
             {renderError()}
             {renderCopy()}
+            <h1>Gif Search Demo</h1>
             <form className="form-inline justify-content-center m-2">
                 <input onChange={handleSeachChange} type="text" placeholder="Search" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
             </form>
+            <div>(You can also search by adding ?q=[query] to the url)</div>
             <div className="container gifs">
                 {renderGifs()}
             </div>
