@@ -19,3 +19,8 @@ body {
 .gif {
   padding: 0 2px;
 }
+
+.stored-gifs {
+  padding: 0 2px;
+  width: 25%;
+}

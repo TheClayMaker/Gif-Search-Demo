@@ -74,12 +74,6 @@ const Giphy = () => {
         if (isLoading){
             return <div className="">Loading...</div>
         }
-        if (!isStored){
-            for(let i = 0; i < searchData.length; i++){
-                storedData.push(searchData[i])
-            }
-            setIsStored(true);
-        }
         return searchData.map(el => {
             return (
                 <div key={el.id}  type="video/mp4" className="gif">
@@ -101,11 +95,11 @@ const Giphy = () => {
         }
         return storedData.map(el => {
             return (
-                <div key={el.id}  type="video/mp4" className="gif">
+                <div key={el.id}  type="video/mp4" className="stored-gif">
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopiedText(el.images.downsized.url);
+                            setCopyText(el.images.downsized.url);
                             setIsCopy(true);
                         }
                     } src={el.images.looping.mp4}/>
@@ -128,7 +122,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url ${copiedText}!
+                    Copied Gif Url ${copyText}!
                 </div>
             );
         }
@@ -143,6 +137,12 @@ const Giphy = () => {
         setIsError(false);
         setIsLoading(true);
         setIsStored(false);
+        if (!isStored){
+            for(let i = 0; i < searchData.length; i++){
+                storedData.push(searchData[i])
+            }
+            setIsStored(true);
+        }
         try {
             const results = await axios("https://api.giphy.com/v1/gifs/search", {
             params: {
@@ -180,8 +180,9 @@ const Giphy = () => {
                 {renderCopy()}
                 {renderGifs()}
             </div>
-            <div>Previous Results</div>
-            <div>
+            <h2>Previous Results</h2>
+            <div className="container gifs">
+                {renderCopy()}
                 {renderStoredGifs()}
             </div>
         </div>
