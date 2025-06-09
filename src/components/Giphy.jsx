@@ -8,7 +8,7 @@ const Giphy = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
     const [isCopy, setIsCopy] = useState(false);
-    const [copyText, setCopyText] = useState("");
+    const [copiedText, setCopiedText] = useState("");
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -21,7 +21,7 @@ const Giphy = () => {
                 if (Object.keys(q).length !== 0){
                     try {
                         setIsLoading(true);
-                        const results = await axios("http://api.giphy.com/v1/gifs/search", {
+                        const results = await axios("https://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
@@ -54,7 +54,7 @@ const Giphy = () => {
                     <video loop="true" autoplay="true" onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopyText(el.images.downsized.url);
+                            setCopiedText(el.images.downsized.url);
                             setIsCopy(true);
                         }
                     } src={el.images.looping.mp4}/>
@@ -77,7 +77,7 @@ const Giphy = () => {
         if (isCopy){
             return (
                 <div>
-                    Copied Gif Url ${copyText}!
+                    Copied Gif Url ${copiedText}!
                 </div>
             );
         }
@@ -114,7 +114,7 @@ const Giphy = () => {
         <div className="m-2">
             {renderError()}
             {renderCopy()}
-            <h1>Gif Search Demo</h1>
+            <h1>Enter Query Here</h1>
             <form className="form-inline justify-content-center m-2">
                 <input onChange={handleSeachChange} type="text" placeholder="Search" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
