@@ -5,6 +5,7 @@ body {
 
 .m-2 {
     text-align: center;
+    white-space: pre-line;
 }
 
 .gifs {

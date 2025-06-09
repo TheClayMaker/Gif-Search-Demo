@@ -3,12 +3,14 @@ import axios from "axios";
 
 
 const Giphy = () => {
-    const [data, setData] = useState([]);
+    const [searchData, setSearchData] = useState([]);
+    const [storedData, setStoredData] = useState([]);
     const [search, setSearch] = useState("")
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
+    const [isStored, setIsStored] = useState(true);
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -21,15 +23,16 @@ const Giphy = () => {
                 if (Object.keys(q).length !== 0){
                     try {
                         setIsLoading(true);
+                        setIsStored(false);
                         const results = await axios("http://api.giphy.com/v1/gifs/search", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 5
+                                limit: 3
                             }
                         });
                         console.log(results);
-                        setData(results.data.data);
+                        setSearchData(results.data.data);
                         setIsLoading(false);
 
                     } catch(err) {
@@ -43,6 +46,7 @@ const Giphy = () => {
                 try {
                     const randArray = [];
                     setIsLoading(true);
+                    setIsStored(false);
                     for(let i = 0; i < 3; i++){
                         const results = await axios("http://api.giphy.com/v1/gifs/random", {
                             params: {
@@ -53,7 +57,7 @@ const Giphy = () => {
                         randArray.push(results.data.data)
                         console.log(randArray)
                     }
-                    setData(randArray);
+                    setSearchData(randArray);
                     setIsLoading(false);
                 } catch(err) {
                     setIsError(true);
@@ -70,7 +74,32 @@ const Giphy = () => {
         if (isLoading){
             return <div className="">Loading...</div>
         }
-        return data.map(el => {
+        if (!isStored){
+            for(let i = 0; i < searchData.length; i++){
+                storedData.push(searchData[i])
+            }
+            setIsStored(true);
+        }
+        return searchData.map(el => {
+            return (
+                <div key={el.id}  type="video/mp4" className="gif">
+                    <video loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(el.images.downsized.url);
+                            setCopyText(el.images.downsized.url);
+                            setIsCopy(true);
+                        }
+                    } src={el.images.looping.mp4}/>
+                </div>
+            )
+        })
+    };
+
+    const renderStoredGifs = () => {
+        if (isLoading){
+            return <div className="">Loading...</div>
+        }
+        return storedData.map(el => {
             return (
                 <div key={el.id}  type="video/mp4" className="gif">
                     <video loop={true} autoPlay={true} onClick={
@@ -113,18 +142,18 @@ const Giphy = () => {
         event.preventDefault();
         setIsError(false);
         setIsLoading(true);
-
+        setIsStored(false);
         try {
             const results = await axios("https://api.giphy.com/v1/gifs/search", {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 5
+                limit: 3
             }
         });
         console.log(results);
-        setData(results.data.data);
-        console.log(data)
+        setSearchData(results.data.data);
+        console.log(searchData)
         } catch (err) {
             setIsError(true);
             setTimeout(() => setIsError(false), 5000);
@@ -142,7 +171,7 @@ const Giphy = () => {
                 </div>
                 <h1>Gif Search Demo</h1>
             </div>
-            <form className="form-inline justify-content-center m-2">
+            <form onsubmit="return false;" className="form-inline justify-content-center m-2">
                 <input onChange={handleSeachChange} type="text" placeholder="Search" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
             </form>
@@ -150,6 +179,10 @@ const Giphy = () => {
             <div className="container gifs">
                 {renderCopy()}
                 {renderGifs()}
+            </div>
+            <div>Previous Results</div>
+            <div>
+                {renderStoredGifs()}
             </div>
         </div>
     ); 
