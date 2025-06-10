@@ -11,7 +11,13 @@ const Giphy = () => {
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndexPrev, setSelectedIndexPrev] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(1);
+    const [selectedIndexNext, setSelectedIndexNext] = useState(2);
+    const [limit, setLimit] = useState(3);
+    const [prevLimit, setPrevLimit] = useState(3);
+
+
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -29,16 +35,20 @@ const Giphy = () => {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 100
+                                limit: limit
                             }
                         });
                         console.log(results);
                         setSearchData(results.data.data);
                         setIsLoading(false);
+                        if(results.status !== 200){
+                            console.log(results.status);
+                            throw new Error("",results.status);
+                        }
 
                     } catch(err) {
-                        setIsError(err.response.status);
                         console.log(err);
+                        setIsError(err);
                         setTimeout(() => setIsError(""), 5000)
                     }
                 }
@@ -48,13 +58,17 @@ const Giphy = () => {
                     const randArray = [];
                     setIsLoading(true);
                     setIsStored(false);
-                    for(let i = 0; i < 3; i++){
+                    for(let i = 0; i < limit; i++){
                         const results = await axios("https://api.giphy.com/v1/gifs/random", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h"
                             }
                         });
                         console.log(results);
+                        if(results.status !== 200){
+                            console.log(results.status);
+                            throw new Error("",results.status);
+                        }
                         randArray.push(results.data.data)
                         console.log(randArray)
                     }
@@ -78,7 +92,19 @@ const Giphy = () => {
         }
         else{
             setSelectedIndex(selectedIndex - 1);
-        }        
+        }
+        if (selectedIndexNext === 0){
+            setSelectedIndexNext(searchData.length - 1);
+        }
+        else{
+            setSelectedIndexNext(selectedIndexNext - 1);
+        }
+        if (selectedIndexPrev === 0){
+            setSelectedIndexPrev(searchData.length - 1);
+        }
+        else{
+            setSelectedIndexPrev(selectedIndexPrev - 1);
+        }
     }
 
     const handleNext = event =>{
@@ -88,7 +114,19 @@ const Giphy = () => {
         }
         else{
             setSelectedIndex(selectedIndex + 1);
-        }        
+        }
+        if (selectedIndexNext === searchData.length - 1){
+            setSelectedIndexNext(0);
+        }
+        else{
+            setSelectedIndexNext(selectedIndexNext + 1);
+        }
+        if (selectedIndexPrev === searchData.length - 1){
+            setSelectedIndexPrev(0);
+        }
+        else{
+            setSelectedIndexPrev(selectedIndexPrev + 1);
+        }     
     }
 
     const renderGifs = () => {
@@ -99,19 +137,40 @@ const Giphy = () => {
         {
             return;
         }
+        if (searchData.length < limit){
+            for (let i = 0; searchData.length < limit; i++){
+                searchData.push(searchData[i]);
+            }
+        }
         console.log(searchData);
         console.log("selected index: " + selectedIndex)
         console.log("data stored: " + isStored);
         return (
             <div>
-                <div id={searchData[selectedIndex].id}  type="video/mp4" className="gif">
-                    <video loop={true} autoPlay={true} onClick={
+                <div type="video/mp4" className="gif">
+                    <video key={searchData[selectedIndexPrev].id} className="unselected" loop={true} autoPlay={true} onClick={
                         async src => {
-                            window.navigator.clipboard.writeText(searchData[selectedIndex].images.downsized.url);
-                            setCopyText(searchData[selectedIndex].images.downsized.url);
+                            window.navigator.clipboard.writeText(searchData[selectedIndexPrev].images.original.url);
+                            setCopyText(searchData[selectedIndexPrev].images.original.url);
+                            handlePrev();
+                            setIsCopy(true);
+                        }
+                    } src={searchData[selectedIndexPrev].images.looping.mp4}/>
+                    <video key={searchData[selectedIndex].id} className="selected" loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(searchData[selectedIndex].images.original.url);
+                            setCopyText(searchData[selectedIndex].images.original.url);
                             setIsCopy(true);
                         }
                     } src={searchData[selectedIndex].images.looping.mp4}/>
+                    <video key={searchData[selectedIndexNext].id} className="unselected" loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(searchData[selectedIndexNext].images.original.url);
+                            setCopyText(searchData[selectedIndexNext].images.original.url);
+                            handleNext();
+                            setIsCopy(true);
+                        }
+                    } src={searchData[selectedIndexNext].images.looping.mp4}/>
                 </div>
                 <button onClick={handlePrev} className="btn mx-2">Prev</button>
                 <button onClick={handleNext} className="btn mx-2">Next</button>
@@ -126,10 +185,10 @@ const Giphy = () => {
         return storedData.map(el => {
             return (
                 <div id={el.id}  type="video/mp4" className="stored-gif">
-                    <video loop={true} autoPlay={true} onClick={
+                    <video loop={true} className="stored" autoPlay={true} onClick={
                         async src => {
-                            window.navigator.clipboard.writeText(el.images.downsized.url);
-                            setCopyText(el.images.downsized.url);
+                            window.navigator.clipboard.writeText(el.images.original.url);
+                            setCopyText(el.images.original.url);
                             setIsCopy(true);
                         }
                     } src={el.images.looping.mp4}/>
@@ -140,23 +199,24 @@ const Giphy = () => {
 
     const renderError = () => {
         let error = "";
+        console.log(isError);
         switch (isError){
-            case "400":
+            case 400:
                 error = "Bad Request";
                 break;
-            case "401":
+            case 401:
                 error = "Unauthorized";
                 break;
-            case "403":
+            case 403:
                 error = "Forbidden";
                 break;
-            case "404":
+            case 404:
                 error = "Not Found";
                 break;
-            case "414":
+            case 414:
                 error = "URI Too Long";
                 break;
-            case "429":
+            case 429:
                 error = "Too Many Requests";
                 break;
             case "":
@@ -178,7 +238,7 @@ const Giphy = () => {
     const renderCopy = () => {
         if (isCopy){
             return (
-                <div class="copied">
+                <div className="copied">
                     Copied Gif Url - {copyText}
                 </div>
             );
@@ -189,12 +249,19 @@ const Giphy = () => {
         setSearch(event.target.value);
     };
 
+    const handleLimitChange = event => {
+        setPrevLimit(limit);
+        setLimit(event.target.value);
+    };
+
     const handleSubmit = async event => {
         event.preventDefault();
         setIsError("");
         setIsLoading(true);
         if (!isStored){
-            storedData.push(searchData[selectedIndex])
+            for(let i=0;i<prevLimit;i++){
+                storedData.push(searchData[i]);
+            }
             setIsStored(true);
         }
         try {
@@ -202,7 +269,7 @@ const Giphy = () => {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 100
+                limit: limit
             }
         });
         console.log(results);
@@ -215,7 +282,9 @@ const Giphy = () => {
 
         setIsLoading(false);
         setIsStored(false);
-        setSelectedIndex(0);
+        setSelectedIndexPrev(0);
+        setSelectedIndex(1);
+        setSelectedIndexNext(2);
         setIsCopy(false);
      };
 
@@ -228,11 +297,11 @@ const Giphy = () => {
                 </div>
                 <h1>Gif Search Demo</h1>
             </div>
-            <form onsubmit="return false;" className="form-inline justify-content-center m-2">
-                <input onChange={handleSeachChange} type="text" placeholder="Search" className="form-control"/>
+            <input onChange={handleLimitChange} width="100px" type="text" placeholder="How Many Gifs?" className="form-control"/>
+            <form onSubmit="return false;" className="form-inline justify-content-center m-2">
+                <input onChange={handleSeachChange} type="text" placeholder="?q=[insert search here]" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
             </form>
-            <div>(You can also search by adding ?q=[query] to the url)</div>
             <div className="container gifs">
                 {renderCopy()}
                 {renderGifs()}

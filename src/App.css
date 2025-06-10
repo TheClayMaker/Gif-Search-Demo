@@ -3,6 +3,19 @@ body {
   color: white;
 }
 
+.selected {
+  width: 30%;
+}
+
+.unselected {
+  opacity: 0.10;
+  width: 30%
+}
+
+.stored {
+  width: 100%;
+}
+
 .error {
   color: red;
 }
@@ -21,14 +34,17 @@ body {
   width: 80%;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  vertical-align: middle;
   justify-content: center;
 }
 
 .gif {
   padding: 0 2px;
+  vertical-align: middle;
 }
 
-.stored-gifs {
+.stored-gif {
   padding: 0 2px;
-  width: 25%;
+  width: 10%;
 }
