@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 
+
 const Giphy = () => {
     const [searchData, setSearchData] = useState([]);
     const [storedData, setStoredData] = useState([]);
@@ -10,10 +11,10 @@ const Giphy = () => {
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
-   
     const [selectedIndexPrev, setSelectedIndexPrev] = useState(0);
     const [selectedIndex, setSelectedIndex] = useState(1);
     const [selectedIndexNext, setSelectedIndexNext] = useState(2);
+
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -35,18 +36,15 @@ const Giphy = () => {
                             }
                         });
                         console.log(results);
-                        console.log(results.response.status);
                         setSearchData(results.data.data);
                         setIsLoading(false);
-                        if (results.response.status === 429){
-                            console.log("too many requests");
-                            setIsError(429);
-                            setTimeout(() => setIsError(""), 5000);
+                        if(results.status != 200){
+                            throw new Error("",results.status);
                         }
 
                     } catch(err) {
-                        setIsError(err.response.status);
                         console.log(err);
+                        setIsError(err);
                         setTimeout(() => setIsError(""), 5000)
                     }
                 }
@@ -145,7 +143,7 @@ const Giphy = () => {
                             setIsCopy(true);
                         }
                     } src={searchData[selectedIndexPrev].images.looping.mp4}/>
-                    <video key={searchData[selectedIndex].id} loop={true} autoPlay={true} onClick={
+                    <video key={searchData[selectedIndex].id} className="selected" loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(searchData[selectedIndex].images.original.url);
                             setCopyText(searchData[selectedIndex].images.original.url);
@@ -174,7 +172,7 @@ const Giphy = () => {
         return storedData.map(el => {
             return (
                 <div id={el.id}  type="video/mp4" className="stored-gif">
-                    <video loop={true} autoPlay={true} onClick={
+                    <video loop={true} className="stored" autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(el.images.original.url);
                             setCopyText(el.images.original.url);
@@ -209,6 +207,9 @@ const Giphy = () => {
                 break;
             case "":
                 error = "";
+                break;
+            default:
+                error = "Unknown";
                 break;
         }
         if (error !== ""){
