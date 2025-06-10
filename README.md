@@ -71,6 +71,8 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 # Notes from Developer
 
+By default, the search will return 3 gifs. Users may enter the number of gifs prior to searching.
+
 Users may enter search queries through the search bar or the url by adding "?q={query}" as a parameter.
 
 Clicking on a gif will copy that gif's url to the clipboard. Green text will appear to confirm that the url was copied.
