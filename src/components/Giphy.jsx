@@ -11,7 +11,10 @@ const Giphy = () => {
     const [isCopy, setIsCopy] = useState(false);
     const [copyText, setCopyText] = useState("");
     const [isStored, setIsStored] = useState(true);
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndexPrev, setSelectedIndexPrev] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(1);
+    const [selectedIndexNext, setSelectedIndexNext] = useState(2);
+
 
     useEffect(() =>{
         const fetchData = async () => {
@@ -29,7 +32,7 @@ const Giphy = () => {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 100
+                                limit: 12
                             }
                         });
                         console.log(results);
@@ -78,7 +81,19 @@ const Giphy = () => {
         }
         else{
             setSelectedIndex(selectedIndex - 1);
-        }        
+        }
+        if (selectedIndexNext === 0){
+            setSelectedIndexNext(searchData.length - 1);
+        }
+        else{
+            setSelectedIndexNext(selectedIndexNext - 1);
+        }
+        if (selectedIndexPrev === 0){
+            setSelectedIndexPrev(searchData.length - 1);
+        }
+        else{
+            setSelectedIndexPrev(selectedIndexPrev - 1);
+        }
     }
 
     const handleNext = event =>{
@@ -88,7 +103,19 @@ const Giphy = () => {
         }
         else{
             setSelectedIndex(selectedIndex + 1);
-        }        
+        }
+        if (selectedIndexNext === searchData.length - 1){
+            setSelectedIndexNext(0);
+        }
+        else{
+            setSelectedIndexNext(selectedIndexNext + 1);
+        }
+        if (selectedIndexPrev === searchData.length - 1){
+            setSelectedIndexPrev(0);
+        }
+        else{
+            setSelectedIndexPrev(selectedIndexPrev + 1);
+        }     
     }
 
     const renderGifs = () => {
@@ -105,6 +132,14 @@ const Giphy = () => {
         return (
             <div>
                 <div id={searchData[selectedIndex].id}  type="video/mp4" className="gif">
+                    <video className="unselected" loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(searchData[selectedIndexPrev].images.downsized.url);
+                            setCopyText(searchData[selectedIndexPrev].images.downsized.url);
+                            handlePrev();
+                            setIsCopy(true);
+                        }
+                    } src={searchData[selectedIndexPrev].images.looping.mp4}/>
                     <video loop={true} autoPlay={true} onClick={
                         async src => {
                             window.navigator.clipboard.writeText(searchData[selectedIndex].images.downsized.url);
@@ -112,6 +147,14 @@ const Giphy = () => {
                             setIsCopy(true);
                         }
                     } src={searchData[selectedIndex].images.looping.mp4}/>
+                    <video className="unselected" loop={true} autoPlay={true} onClick={
+                        async src => {
+                            window.navigator.clipboard.writeText(searchData[selectedIndexNext].images.downsized.url);
+                            setCopyText(searchData[selectedIndexNext].images.downsized.url);
+                            handleNext();
+                            setIsCopy(true);
+                        }
+                    } src={searchData[selectedIndexNext].images.looping.mp4}/>
                 </div>
                 <button onClick={handlePrev} className="btn mx-2">Prev</button>
                 <button onClick={handleNext} className="btn mx-2">Next</button>
@@ -194,7 +237,9 @@ const Giphy = () => {
         setIsError("");
         setIsLoading(true);
         if (!isStored){
-            storedData.push(searchData[selectedIndex])
+            for(let i=0;i<searchData.length;i++){
+                storedData.push(searchData[i]);
+            }
             setIsStored(true);
         }
         try {
@@ -202,7 +247,7 @@ const Giphy = () => {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 100
+                limit: 12
             }
         });
         console.log(results);
@@ -215,7 +260,9 @@ const Giphy = () => {
 
         setIsLoading(false);
         setIsStored(false);
-        setSelectedIndex(0);
+        setSelectedIndexPrev(0);
+        setSelectedIndex(1);
+        setSelectedIndexNext(2);
         setIsCopy(false);
      };
 
