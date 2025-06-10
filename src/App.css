@@ -34,5 +34,5 @@ body {
 
 .stored-gifs {
   padding: 0 2px;
-  width: 10%;
+  max-width: 10%;
 }
