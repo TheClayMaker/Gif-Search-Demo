@@ -14,6 +14,9 @@ const Giphy = () => {
     const [selectedIndexPrev, setSelectedIndexPrev] = useState(0);
     const [selectedIndex, setSelectedIndex] = useState(1);
     const [selectedIndexNext, setSelectedIndexNext] = useState(2);
+    const [limit, setLimit] = useState(3);
+    const [prevLimit, setPrevLimit] = useState(3);
+
 
 
     useEffect(() =>{
@@ -32,13 +35,14 @@ const Giphy = () => {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                                 q: q,
-                                limit: 12
+                                limit: limit
                             }
                         });
                         console.log(results);
                         setSearchData(results.data.data);
                         setIsLoading(false);
-                        if(results.status != 200){
+                        if(results.status !== 200){
+                            console.log(results.status);
                             throw new Error("",results.status);
                         }
 
@@ -54,13 +58,17 @@ const Giphy = () => {
                     const randArray = [];
                     setIsLoading(true);
                     setIsStored(false);
-                    for(let i = 0; i < 3; i++){
+                    for(let i = 0; i < limit; i++){
                         const results = await axios("https://api.giphy.com/v1/gifs/random", {
                             params: {
                                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h"
                             }
                         });
                         console.log(results);
+                        if(results.status !== 200){
+                            console.log(results.status);
+                            throw new Error("",results.status);
+                        }
                         randArray.push(results.data.data)
                         console.log(randArray)
                     }
@@ -129,6 +137,11 @@ const Giphy = () => {
         {
             return;
         }
+        if (searchData.length < limit){
+            for (let i = 0; searchData.length < limit; i++){
+                searchData.push(searchData[i]);
+            }
+        }
         console.log(searchData);
         console.log("selected index: " + selectedIndex)
         console.log("data stored: " + isStored);
@@ -186,23 +199,24 @@ const Giphy = () => {
 
     const renderError = () => {
         let error = "";
+        console.log(isError);
         switch (isError){
-            case "400":
+            case 400:
                 error = "Bad Request";
                 break;
-            case "401":
+            case 401:
                 error = "Unauthorized";
                 break;
-            case "403":
+            case 403:
                 error = "Forbidden";
                 break;
-            case "404":
+            case 404:
                 error = "Not Found";
                 break;
-            case "414":
+            case 414:
                 error = "URI Too Long";
                 break;
-            case "429":
+            case 429:
                 error = "Too Many Requests";
                 break;
             case "":
@@ -235,12 +249,17 @@ const Giphy = () => {
         setSearch(event.target.value);
     };
 
+    const handleLimitChange = event => {
+        setPrevLimit(limit);
+        setLimit(event.target.value);
+    };
+
     const handleSubmit = async event => {
         event.preventDefault();
         setIsError("");
         setIsLoading(true);
         if (!isStored){
-            for(let i=0;i<searchData.length;i++){
+            for(let i=0;i<prevLimit;i++){
                 storedData.push(searchData[i]);
             }
             setIsStored(true);
@@ -250,7 +269,7 @@ const Giphy = () => {
             params: {
                 api_key: "iRttFlkEbQPcmDCM6B6L0VTgtZETZi4h",
                 q: search,
-                limit: 12
+                limit: limit
             }
         });
         console.log(results);
@@ -278,6 +297,7 @@ const Giphy = () => {
                 </div>
                 <h1>Gif Search Demo</h1>
             </div>
+            <input onChange={handleLimitChange} width="100px" type="text" placeholder="How Many Gifs?" className="form-control"/>
             <form onSubmit="return false;" className="form-inline justify-content-center m-2">
                 <input onChange={handleSeachChange} type="text" placeholder="?q=[insert search here]" className="form-control"/>
                 <button onClick={handleSubmit} type="submit" className="btn btn-primary mx-2">Submit</button>
